@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -15,16 +16,25 @@ namespace PagesMariaDB.Pages
         private readonly ILogger<IndexModel> _logger;
         private readonly StoreContext _context;
 
-        public IndexModel(ILogger<IndexModel> logger, StoreContext context)
+        private readonly UserManager<WebUser> _UserManager;
+
+        public IndexModel(ILogger<IndexModel> logger, StoreContext context, UserManager<WebUser> userManager)
         {
             _logger = logger;
             _context = context;
+            _UserManager = userManager;
         }
 
         public IList<Product> Products { get; set; }
+        public WebUser WebUser { get; set; }
+
+
 
         public async Task OnGetAsync()
         {
+            if (User.Identity.IsAuthenticated)
+                WebUser = await _UserManager.GetUserAsync(User);
+
             var products = from product in _context.Products select product;
             Products = await products.ToListAsync();
         }
